@@ -1,0 +1,19 @@
+{
+  "name": "trabajo-integrador",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "node-fetch": "^2.7.0",
+    "node-google-translate-skidz": "^1.1.2"
+  }
+}

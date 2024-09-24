@@ -1,0 +1,30 @@
+#grilla {
+    display: grid;
+    grid-template-columns: repeat(4,  1fr); /* Crea columnas dinámicas /
+    gap: 20px; / Espacio entre los elementos */
+    padding: 20px;
+}
+.objeto { 
+    background-color: #f9f9f9;
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    padding: 10px;
+    text-align: center; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.objeto img {
+    max-width: 100%; 
+    height: auto; 
+    border-radius: 4px; 
+}
+
+.Titulo {
+    font-size: 1.2em; 
+    margin: 10px 0 5px; 
+}
+
+.cultura, .dinastia {
+    font-size: 0.9em; 
+    color: #555;  
+}
