@@ -1,148 +1,252 @@
-//DOM
-const departamentoSelect = document.getElementById('Departamentos'); 
-const formulario = document.getElementById('formulario'); 
-const obra = document.getElementById('Obra');
-const ubicacion = document.getElementById('Ubicacion');
-const dpto = document.getElementById('Departamentos');
 
+// DOM
+const selectDepartamento = document.getElementById('Departamentos'); 
+const formulario = document.getElementById('formulario'); 
+const inputObra = document.getElementById('Obra');
+const inputUbicacion = document.getElementById('Ubicacion');
+const paginacionDiv = document.getElementById('paginacion'); 
+const tooltip = document.getElementById('tooltip');
 
 // VARIABLES
-const urlBase = 'https://collectionapi.metmuseum.org/public/collection/v1/'
-const URLImagenes = "https://collectionapi.metmuseum.org/public/collection/v1/search?q=&hasImages=true"
-const URLDpto = "https://collectionapi.metmuseum.org/public/collection/v1/departments"
-const URLobjeto = "https://collectionapi.metmuseum.org/public/collection/v1/objects/"
-const URLsearch = "https://collectionapi.metmuseum.org/public/collection/v1/search"
+const urlBase = 'https://collectionapi.metmuseum.org/public/collection/v1/';
+const urlImagenes = "https://collectionapi.metmuseum.org/public/collection/v1/search?q=&hasImages=true";
+const urlDepartamentos = "https://collectionapi.metmuseum.org/public/collection/v1/departments";
+const urlObjeto = "https://collectionapi.metmuseum.org/public/collection/v1/objects/";
+const urlBuscar = "https://collectionapi.metmuseum.org/public/collection/v1/search";
 
 
+// Paginación
+let paginaActual = 1; 
+const objetosPorPagina = 10; 
+let totalResultados = 0; 
+let datosBusquedaActual = []; 
 
-function FetchDptos() {
-
-    const departamentos = fetch(`${urlBase}/departments`)   // Esto trae una promesa, al ser asincrono, por eso necesita un then, para que funcione.
-    . then ((respuesta) => respuesta.json())                // aca se parsea la promesa a un objeto json.
-    .then((data) => {                                       // y aca finalmente se usa el objeto json para traer las ubicaciones.
-
-            const todaslasOpciones = document.createElement('option');
-            todaslasOpciones.setAttribute('value', 0);
-            todaslasOpciones.textContent = 'Todas las Opciones';
-
-            departamentoSelect.appendChild(todaslasOpciones);
-
-            console.log(data.departments)
-        
-            data.departments.forEach((departamento) => {    
-
-            const opcion = document.createElement('option');
-            opcion.setAttribute('value', departamento.departmentId); // Esta linea es para el value del select.
-        
-            opcion.textContent = departamento.displayName;  // 
-
-            departamentoSelect.appendChild(opcion);
-            
-    
-
-    });
- 
-    })
-}
-FetchDptos();
-
-
-function fetchObjetos(objectIDs) {
-    let objetosHTML = "";
-    for(objectId of objectIDs) {
-        fetch(URLobjeto + objectId) 
+// Obtener departamentos
+function obtenerDepartamentos() {
+    fetch(urlDepartamentos)
         .then((respuesta) => respuesta.json())
         .then((data) => {
-        if(data.primaryImageSmall){
-            let img = data.primaryImageSmall || "sin imagen.jpg";
-            let titulo = data.title || "Sin informacion";
-            let cultura = data.culture || "Sin informacion";
-            let dinastia = data.dinasty  || "Sin informacion";
+            const opcionTodas = document.createElement('option');
+            opcionTodas.setAttribute('value', 0);
+            opcionTodas.textContent = 'Todas las Opciones';
+            selectDepartamento.appendChild(opcionTodas);
 
-          if(titulo != "Sin informacion" ){ 
-            objetosHTML += `<div class = "objeto"> <img src= "${img}"/>
-          <h4 class = "titulo"> ${titulo} </h4>
-          <h5 class = "cultura"> ${cultura} </h5>
-          <h5 class = "dinastia">${dinastia}</h5>
-          </div> ` 
-        } 
-         
+            data.departments.forEach((departamento) => {
+                const opcion = document.createElement('option');
+                opcion.setAttribute('value', departamento.departmentId);
+                opcion.textContent = departamento.displayName;
+                selectDepartamento.appendChild(opcion);
+            });
+        });
+}
 
-            
-         document.getElementById("grilla").innerHTML = objetosHTML;
+obtenerDepartamentos();
+
+// Función para traducir
+async function traducir(texto, idiomaDestino) {
+    try {
+        const response = await fetch('/translate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: texto, targetLang: idiomaDestino })
+        });
+        const resultado = await response.json();
+        return resultado.translatedText;
+    } catch (error) {
+        console.error('Error al traducir:', error);
+        return texto; 
     }
-         console.log(data.objectID);
-        })
-}}
+}
 
+// Función para obtener objetos y mostrarlos
+async function obtenerObjetos(idsObjetos) {
+    let objetosHTML = "";
+    let inicio = (paginaActual - 1) * objetosPorPagina;
+    let fin = inicio + objetosPorPagina;
+    let idsPaginados = idsObjetos.slice(inicio, fin); 
 
-fetch(URLImagenes).then((respuesta) => respuesta.json()) 
-.then((data) => {
-fetchObjetos(data.objectIDs.slice (0, 21))  
+    for (let idObjeto of idsPaginados) {
+        try {
+            const respuesta = await fetch(urlObjeto + idObjeto);
+            const data = await respuesta.json();
 
-})                                                                       
+            if (data.primaryImageSmall) {
+                let img = data.primaryImageSmall || "sin-imagen.jpg";
 
-
-
-
-formulario.addEventListener("submit", (evento) => {
-    evento.preventDefault();
-    let Obra = obra.value;
-    let Ubi = ubicacion.value;   
-    let Depa = dpto.value;
-    if(Depa == 0 && Obra == '' && Ubi == '') {
-        console.log("No hay filtro");
-        Depa = "";
-        Obra = "";
-        Ubi = "";
-        fetch(URLImagenes)
-        .then(respuesta => respuesta.json())
-        . then((data) => {
-
-            fetchObjetos(data.objectIDs.slice (0, 21));
-
-            })
-            
-            
-            return;
-    }
-    buscarObjetosFiltrados(Obra, Ubi, Depa);
-    console.log("Formulario Enviado");    
-})
-   
-
-
-
-
-       
-    
-
-    
-function buscarObjetosFiltrados(obra, ubi, depa) {
-
-    if( ubi == 0) {
-    ubi = "";
-    }else if(ubi!=0) {
-        ubi = "&geoLocation=" + ubi;
-    }
-    if(depa == 0) {
-    depa = "";
-    }else if(depa!=0) {
-        depa = "&departmentId=" + depa;
+                let titulo = await traducir(data.title || "Sin información", "es");
+                let cultura = await traducir(data.culture || "Sin información", "es");
+                let dinastia = await traducir(data.dynasty || "Sin información", "es");
+                let Fecha = data.objectDate || "Sin información";
+                
+                objetosHTML += 
+                `<div class="objeto"> 
+                    <img onmouseover = "mostrarDetalles(event,'${Fecha}')" onmouseout = "ocultarDetalles()" src="${img}" alt="${titulo}"/> 
+                    <h4 class="Titulo">${titulo}</h4>
+                    <h4 class="Cultura">Cultura: ${cultura}</h4>
+                    <h4 class="Dinastia">Dinastía: ${dinastia}</h4>
+                    ${data.additionalImages && data.additionalImages.length > 0 ? 
+                        `<button class="openModalBtn" data-id="${data.objectID}">Ver más imágenes</button>` : 
+                        ''
+                    }
+                </div>`;
+            }
+        } catch (error) {
+            console.error('Error al obtener el objeto:', error);
+        }
     }
 
-    
-    console.log(URLsearch + "?q=" + obra + "&departamentId=" + depa + ubi);
-    fetch(URLsearch + "?q=" + obra + depa + ubi)
+    document.getElementById("grilla").innerHTML = objetosHTML;
+
+    const botones = document.querySelectorAll('.openModalBtn');
+    botones.forEach((boton) => {
+        boton.addEventListener('click', (e) => {
+            const idObjeto = e.target.getAttribute('data-id');
+            abrirModal(idObjeto);
+        });
+    });
+
+    // Generar botones de paginación
+    generarBotonesPaginacion(idsObjetos.length);
+}
+
+// Función para generar botones de paginación
+function generarBotonesPaginacion(totalObjetos) {
+    paginacionDiv.innerHTML = ''; // Limpiar botones anteriores
+
+    const totalPaginas = Math.ceil(totalObjetos / objetosPorPagina);
+
+    // Botón "Anterior"
+    if (paginaActual > 1) {
+        const botonAnterior = document.createElement('button');
+        botonAnterior.textContent = 'Anterior';
+        botonAnterior.addEventListener('click', () => {
+            paginaActual--;
+            obtenerObjetos(datosBusquedaActual);
+        });
+        paginacionDiv.appendChild(botonAnterior);
+    }
+
+    // Botón "Siguiente"
+    if (paginaActual < totalPaginas) {
+        const botonSiguiente = document.createElement('button');
+        botonSiguiente.textContent = 'Siguiente';
+        botonSiguiente.addEventListener('click', () => {
+            paginaActual++;
+            obtenerObjetos(datosBusquedaActual);
+        });
+        paginacionDiv.appendChild(botonSiguiente);
+    }
+
+    // Mostrar información de página
+    const infoPagina = document.createElement('span');
+    infoPagina.textContent = `Página ${paginaActual} de ${totalPaginas}`;
+    paginacionDiv.appendChild(infoPagina);
+}
+
+// Inicializar la carga de imágenes
+fetch(urlImagenes)
     .then((respuesta) => respuesta.json())
     .then((data) => {
-        if(!data.objectIDs){
-            console.log("no se encontraron objetos");
-            return  
-        }else{
-            console.log("se encontraron " + data.objectIDs.length + " objetos");
-            fetchObjetos(data.objectIDs.slice(0, 21));            
-        }
+        datosBusquedaActual = data.objectIDs; 
+        obtenerObjetos(datosBusquedaActual);
+    });
 
-    })
+// Evento del formulario de búsqueda
+formulario.addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    let obra = inputObra.value;
+    let ubicacion = inputUbicacion.value;   
+    let departamento = selectDepartamento.value;
+
+    paginaActual = 1; 
+
+    if (departamento == 0 && obra == '' && ubicacion == '') {
+        fetch(urlImagenes)
+            .then(respuesta => respuesta.json())
+            .then((data) => {
+                datosBusquedaActual = data.objectIDs;
+                obtenerObjetos(datosBusquedaActual);
+            });
+        return;
+    }
+    buscarObjetosFiltrados(obra, ubicacion, departamento);
+});
+
+// Función para buscar objetos filtrados
+function buscarObjetosFiltrados(obra, ubicacion, departamento) {
+    if (ubicacion == 0) ubicacion = "";
+    else ubicacion = "&geoLocation=" + ubicacion;
+
+    if (departamento == 0) departamento = "";
+    else departamento = "&departmentId=" + departamento;
+
+    fetch(urlBuscar + "?q=" + obra + departamento + ubicacion)
+        .then((respuesta) => respuesta.json())
+        .then((data) => {
+            if (!data.objectIDs) {
+                console.log("No se encontraron objetos");
+                document.getElementById("objetos").innerHTML = "No se encontraron objetos";
+                return;
+            } else {
+                datosBusquedaActual = data.objectIDs;
+                obtenerObjetos(datosBusquedaActual);
+            }
+        });
+}
+
+// Función para abrir el modal y cargar imágenes
+function abrirModal(idObjeto) {
+    fetch(`${urlObjeto}${idObjeto}`)
+        .then(response => response.json())
+        .then(data => {
+            const contenedorImagen = document.getElementById('imageContainer');
+            contenedorImagen.innerHTML = ''; 
+
+            if (data.additionalImages && data.additionalImages.length > 0) {
+                data.additionalImages.forEach((srcImagen) => {
+                    const img = document.createElement('img');
+                    img.src = srcImagen;
+                    contenedorImagen.appendChild(img);
+                });
+            } else {
+                contenedorImagen.innerHTML = '<p>No hay imágenes adicionales.</p>';
+            }
+
+            const modal = document.getElementById('myModal');
+            modal.style.display = "block";
+        });
+}
+
+// Cerrar el modal cuando se hace clic en la "X"
+document.querySelector('.close').onclick = function() {
+    const modal = document.getElementById('myModal');
+    modal.style.display = "none";
+};
+
+// Cerrar el modal si se hace clic fuera del contenido
+window.onclick = function(event) {
+    const modal = document.getElementById('myModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+};
+
+// Cerrar el modal con la tecla "Escape"
+window.onkeydown = function(event) {
+    if (event.key === "Escape") {
+        document.getElementById('myModal').style.display = "none";
+    }
+};
+function mostrarDetalles (event, fecha) {
+    console.log("Fecha:", fecha);
+    tooltip.innerHTML = `Fecha: ${fecha}`;
+    tooltip.style.display = 'block';
+    tooltip.style.left = event.pageX + 'px';
+    tooltip.style.top = event.pageY + 'px';
+
+}
+function ocultarDetalles() {
+    tooltip.style.display = 'none';
 }

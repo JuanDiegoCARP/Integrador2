@@ -5,23 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Museum of New York</title>
     <link rel="stylesheet" href="style.css">
+  
 </head>
 <body>
    <h1> Virtual Museum of New York </h1> 
 
-    <form id="formulario" >
-    <div class="conteiner">
-    <input type="text" name = "Obra" id="Obra">
-    <input type="text" name = "Ubicacion" id="Ubicacion">
-    <select name="Departamentos" id="Departamentos"></select>
-    <button type="submit" id="boton">Buscar</button>
+ 
+    <form id="formulario">
+        <div class="conteiner">
+            <input type="text" name="Obra" id="Obra" placeholder="Nombre de la obra">
+            <input type="text" name="Ubicacion" id="Ubicacion" placeholder="Ubicación">
+            <select name="Departamentos" id="Departamentos"></select>
+            <button type="submit" id="boton">Buscar</button>
+        </div>
     </form>
-    <div id ="grilla">
-        
-    <div class = "buscador"></div> 
-    <div class = "paginacion"></div>
+
+ <div id="tooltip" style="display: none; position: absolute;"></div>
+
+    <p id = "objetos"></p>
+   
+    <div id="grilla"></div>
+
+   
+    <div id="paginacion" class="paginacion"></div>
+
+   
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="imageContainer"></div> 
+        </div>
     </div>
-    </div>
-    <script src = "script.js"> </script>
+
+    <script src="script.js"></script>
 </body>
 </html>
