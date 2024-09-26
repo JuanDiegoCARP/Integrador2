@@ -89,7 +89,8 @@ body {
 }
 
 .paginacion button {
-    background-color: #767a76;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1bd11b;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -99,7 +100,7 @@ body {
 }
 
 .paginacion button:hover {
-    background-color: #767a76;
+    background-color: #1bd11b;
 }
 
 .paginacion span {
