@@ -7,6 +7,7 @@ const inputUbicacion = document.getElementById('Ubicacion');
 const paginacionDiv = document.getElementById('paginacion'); 
 const tooltip = document.getElementById('tooltip');
 
+
 // VARIABLES
 const urlBase = 'https://collectionapi.metmuseum.org/public/collection/v1/';
 const urlImagenes = "https://collectionapi.metmuseum.org/public/collection/v1/search?q=&hasImages=true";
@@ -96,7 +97,7 @@ async function obtenerObjetos(idsObjetos) {
             console.error('Error al obtener el objeto:', error);
         }
     }
-
+    document.getElementById("cargando").style.display = "none";
     document.getElementById("grilla").innerHTML = objetosHTML;
 
     const botones = document.querySelectorAll('.openModalBtn');
@@ -122,8 +123,10 @@ function generarBotonesPaginacion(totalObjetos) {
         const botonAnterior = document.createElement('button');
         botonAnterior.textContent = 'Anterior';
         botonAnterior.addEventListener('click', () => {
+            document.getElementById("grilla").innerHTML = "";
+            document.getElementById("cargando").style.display = "block";
             paginaActual--;
-            obtenerObjetos(datosBusquedaActual);
+            obtenerObjetos(datosBusquedaActual.slice(0, 60));
         });
         paginacionDiv.appendChild(botonAnterior);
     }
@@ -133,8 +136,10 @@ function generarBotonesPaginacion(totalObjetos) {
         const botonSiguiente = document.createElement('button');
         botonSiguiente.textContent = 'Siguiente';
         botonSiguiente.addEventListener('click', () => {
+            document.getElementById("grilla").innerHTML = "";
+            document.getElementById("cargando").style.display = "block";
             paginaActual++;
-            obtenerObjetos(datosBusquedaActual);
+            obtenerObjetos(datosBusquedaActual.slice(0, 60));
         });
         paginacionDiv.appendChild(botonSiguiente);
     }
@@ -150,7 +155,7 @@ fetch(urlImagenes)
     .then((respuesta) => respuesta.json())
     .then((data) => {
         datosBusquedaActual = data.objectIDs; 
-        obtenerObjetos(datosBusquedaActual);
+        obtenerObjetos(datosBusquedaActual.slice(0, 60));
     });
 
 // Evento del formulario de búsqueda
@@ -167,7 +172,7 @@ formulario.addEventListener("submit", (evento) => {
             .then(respuesta => respuesta.json())
             .then((data) => {
                 datosBusquedaActual = data.objectIDs;
-                obtenerObjetos(datosBusquedaActual);
+                obtenerObjetos(datosBusquedaActual.slice(0, 60));
             });
         return;
     }
@@ -189,9 +194,10 @@ function buscarObjetosFiltrados(obra, ubicacion, departamento) {
                 console.log("No se encontraron objetos");
                 document.getElementById("objetos").innerHTML = "No se encontraron objetos";
                 return;
-            } else {
+            } else { 
+                document.getElementById("objetos").innerHTML = "";    
                 datosBusquedaActual = data.objectIDs;
-                obtenerObjetos(datosBusquedaActual);
+                obtenerObjetos(datosBusquedaActual.slice(0, 60));
             }
         });
 }

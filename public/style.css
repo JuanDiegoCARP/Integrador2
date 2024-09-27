@@ -180,3 +180,17 @@ button:active {
     border-radius: 5px;
     display: none;
 }
+
+#cargando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial', sans-serif;
+    font-size: 20px;
+    color: #ffffff;
+    padding: 20px;
+    width: 200px;
+    margin: 0 auto;
+    position: fixed;
+    top: 50%;
+  }
