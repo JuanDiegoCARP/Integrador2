@@ -126,7 +126,7 @@ function generarBotonesPaginacion(totalObjetos) {
             document.getElementById("grilla").innerHTML = "";
             document.getElementById("cargando").style.display = "block";
             paginaActual--;
-            obtenerObjetos(datosBusquedaActual.slice(0, 60));
+            obtenerObjetos(datosBusquedaActual.slice(0, 100));
         });
         paginacionDiv.appendChild(botonAnterior);
     }
@@ -139,7 +139,7 @@ function generarBotonesPaginacion(totalObjetos) {
             document.getElementById("grilla").innerHTML = "";
             document.getElementById("cargando").style.display = "block";
             paginaActual++;
-            obtenerObjetos(datosBusquedaActual.slice(0, 60));
+            obtenerObjetos(datosBusquedaActual.slice(0, 100));
         });
         paginacionDiv.appendChild(botonSiguiente);
     }
@@ -155,7 +155,7 @@ fetch(urlImagenes)
     .then((respuesta) => respuesta.json())
     .then((data) => {
         datosBusquedaActual = data.objectIDs; 
-        obtenerObjetos(datosBusquedaActual.slice(0, 60));
+        obtenerObjetos(datosBusquedaActual.slice(0, 100));
     });
 
 // Evento del formulario de búsqueda
@@ -172,7 +172,7 @@ formulario.addEventListener("submit", (evento) => {
             .then(respuesta => respuesta.json())
             .then((data) => {
                 datosBusquedaActual = data.objectIDs;
-                obtenerObjetos(datosBusquedaActual.slice(0, 60));
+                obtenerObjetos(datosBusquedaActual.slice(0, 100));
             });
         return;
     }
@@ -195,9 +195,12 @@ function buscarObjetosFiltrados(obra, ubicacion, departamento) {
                 document.getElementById("objetos").innerHTML = "No se encontraron objetos";
                 return;
             } else { 
+                document.getElementById("cargando").style.display = "block";
                 document.getElementById("objetos").innerHTML = "";    
                 datosBusquedaActual = data.objectIDs;
-                obtenerObjetos(datosBusquedaActual.slice(0, 60));
+                document.getElementById("grilla").innerHTML = "";
+                obtenerObjetos(datosBusquedaActual.slice(0, 100));
+                console.log(data.objectIDs.length);
             }
         });
 }
